@@ -12,7 +12,7 @@ def get_cart():
         SELECT c.id, p.title, p.price, c.quantity, p.image_url FROM cart c
         JOIN products p ON c.product_id = p.id
         WHERE c.user_id = %s
-    """, (user_id,))
+    """, (int(user_id),))
     items = cursor.fetchall()
     return jsonify([dict(item) for item in items]), 200
 
@@ -34,9 +34,37 @@ def add_to_cart():
             INSERT INTO cart (user_id, product_id, quantity)
             VALUES (%s, %s, %s)
             ON CONFLICT (user_id, product_id) DO UPDATE SET quantity = cart.quantity + EXCLUDED.quantity
-        """, (user_id, product_id, quantity))
+        """, (int(user_id), product_id, quantity))
         conn.commit()
         return jsonify(message="Item added to cart"), 201
+    except Exception as e:
+        conn.rollback()
+        return jsonify(message=str(e)), 500
+
+@cart_bp.route('/<int:cart_id>', methods=['PUT'])
+@jwt_required()
+def update_cart_item(cart_id):
+    user_id = get_jwt_identity()
+    data = request.json
+    quantity = data.get('quantity', 1)
+    
+    cursor = current_app.db_cursor
+    conn = current_app.db_conn
+
+    cursor.execute("SELECT user_id FROM cart WHERE id = %s", (cart_id,))
+    cart_item = cursor.fetchone()
+    if not cart_item:
+        return jsonify(message="Cart item not found"), 404
+    if cart_item['user_id'] != int(user_id):
+        return jsonify(message="Unauthorized"), 403
+
+    try:
+        if quantity <= 0:
+            cursor.execute("DELETE FROM cart WHERE id = %s", (cart_id,))
+        else:
+            cursor.execute("UPDATE cart SET quantity = %s WHERE id = %s", (quantity, cart_id))
+        conn.commit()
+        return jsonify(message="Cart updated"), 200
     except Exception as e:
         conn.rollback()
         return jsonify(message=str(e)), 500
@@ -52,7 +80,7 @@ def remove_from_cart(cart_id):
     cart_item = cursor.fetchone()
     if not cart_item:
         return jsonify(message="Cart item not found"), 404
-    if cart_item['user_id'] != user_id:
+    if cart_item['user_id'] != int(user_id):
         return jsonify(message="Unauthorized"), 403
 
     try:

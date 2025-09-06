@@ -49,7 +49,9 @@ def login():
     cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
     user = cursor.fetchone()
     if user and check_password_hash(user['password_hash'], password):
-        access_token = create_access_token(identity=user['id'])
+        # Create token with string identity
+        user_identity = str(user['id'])
+        access_token = create_access_token(identity=user_identity)
         return jsonify(access_token=access_token), 200
 
     return jsonify(message="Invalid credentials"), 401
@@ -57,12 +59,15 @@ def login():
 @auth_bp.route('/profile', methods=['GET'])
 @jwt_required()
 def profile():
-    user_id = get_jwt_identity()
-    cursor = current_app.db_cursor
+    try:
+        user_id = get_jwt_identity()
+        cursor = current_app.db_cursor
 
-    cursor.execute("SELECT email, username, first_name, last_name, phone, bio, location FROM users WHERE id = %s", (user_id,))
-    user = cursor.fetchone()
-    if user:
-        return jsonify(dict(user)), 200
+        cursor.execute("SELECT email, username, first_name, last_name, phone, bio, location FROM users WHERE id = %s", (int(user_id),))
+        user = cursor.fetchone()
+        if user:
+            return jsonify(dict(user)), 200
 
-    return jsonify(message="User not found"), 404
+        return jsonify(message="User not found"), 404
+    except Exception as e:
+        return jsonify(message=str(e)), 500

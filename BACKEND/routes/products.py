@@ -7,16 +7,26 @@ products_bp = Blueprint('products', __name__)
 def get_products():
     category = request.args.get('category')
     keyword = request.args.get('keyword')
+    user_id = request.args.get('user_id')
     cursor = current_app.db_cursor
 
-    query = "SELECT * FROM products WHERE status = 'active'"
+    query = """
+        SELECT p.*, c.name as category_name 
+        FROM products p 
+        JOIN categories c ON p.category_id = c.id 
+        WHERE p.status = 'active'
+    """
     params = []
 
-    if category:
-        query += " AND category_id = (SELECT id FROM categories WHERE name = %s)"
+    if user_id:
+        query += " AND p.seller_id = %s"
+        params.append(user_id)
+    elif category:
+        query += " AND c.name = %s"
         params.append(category)
+    
     if keyword:
-        query += " AND title ILIKE %s"
+        query += " AND p.title ILIKE %s"
         params.append(f'%{keyword}%')
 
     cursor.execute(query, params)
@@ -35,30 +45,31 @@ def get_product(product_id):
 @products_bp.route('', methods=['POST'])
 @jwt_required()
 def create_product():
-    user_id = get_jwt_identity()
-    data = request.json
-    title = data.get('title')
-    description = data.get('description')
-    category_name = data.get('category')
-    price = data.get('price')
-    image_url = data.get('image_url')
-
-    if not all([title, description, category_name, price, image_url]):
-        return jsonify(message="Missing fields"), 400
-
-    cursor = current_app.db_cursor
-    conn = current_app.db_conn
-
-    cursor.execute("SELECT id FROM categories WHERE name = %s", (category_name,))
-    category = cursor.fetchone()
-    if not category:
-        return jsonify(message="Invalid category"), 400
-
     try:
+        user_id = get_jwt_identity()
+        data = request.json
+        
+        title = data.get('title')
+        description = data.get('description')
+        category_name = data.get('category')
+        price = data.get('price')
+        image_url = data.get('image_url')
+
+        if not all([title, description, category_name, price, image_url]):
+            return jsonify(message="Missing fields"), 400
+
+        cursor = current_app.db_cursor
+        conn = current_app.db_conn
+
+        cursor.execute("SELECT id FROM categories WHERE name = %s", (category_name,))
+        category = cursor.fetchone()
+        if not category:
+            return jsonify(message="Invalid category"), 400
+
         cursor.execute("""
             INSERT INTO products (title, description, category_id, price, image_url, seller_id)
             VALUES (%s, %s, %s, %s, %s, %s)
-        """, (title, description, category['id'], price, image_url, user_id))
+        """, (title, description, category['id'], price, image_url, int(user_id)))
         conn.commit()
         return jsonify(message="Product created successfully"), 201
 
@@ -78,7 +89,7 @@ def update_product(product_id):
     product = cursor.fetchone()
     if not product:
         return jsonify(message="Product not found"), 404
-    if product['seller_id'] != user_id:
+    if product['seller_id'] != int(user_id):
         return jsonify(message="Unauthorized"), 403
 
     fields = []
@@ -112,6 +123,27 @@ def update_product(product_id):
         conn.rollback()
         return jsonify(message=str(e)), 500
 
+@products_bp.route('/my-products', methods=['GET'])
+@jwt_required()
+def get_my_products():
+    try:
+        user_id = get_jwt_identity()
+        cursor = current_app.db_cursor
+        
+        query = """
+            SELECT p.*, c.name as category_name 
+            FROM products p 
+            JOIN categories c ON p.category_id = c.id 
+            WHERE p.seller_id = %s
+            ORDER BY p.created_at DESC
+        """
+        
+        cursor.execute(query, (int(user_id),))
+        products = cursor.fetchall()
+        return jsonify([dict(product) for product in products]), 200
+    except Exception as e:
+        return jsonify(message=str(e)), 500
+
 @products_bp.route('/<int:product_id>', methods=['DELETE'])
 @jwt_required()
 def delete_product(product_id):
@@ -123,7 +155,7 @@ def delete_product(product_id):
     product = cursor.fetchone()
     if not product:
         return jsonify(message="Product not found"), 404
-    if product['seller_id'] != user_id:
+    if product['seller_id'] != int(user_id):
         return jsonify(message="Unauthorized"), 403
 
     try:

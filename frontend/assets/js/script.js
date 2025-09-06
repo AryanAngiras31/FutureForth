@@ -122,7 +122,7 @@ async function getProducts(category = '', search = '') {
     const params = new URLSearchParams();
     
     if (category) params.append('category', category);
-    if (search) params.append('search', search);
+    if (search) params.append('keyword', search);
     
     if (params.toString()) {
       endpoint += `?${params.toString()}`;
@@ -141,6 +141,15 @@ async function addProduct(productData) {
       method: 'POST',
       body: JSON.stringify(productData)
     });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function getMyProducts() {
+  try {
+    const response = await apiRequest('/products/my-products');
     return response;
   } catch (error) {
     throw error;
@@ -180,9 +189,9 @@ async function removeFromCart(productId) {
   }
 }
 
-async function updateCartQuantity(productId, quantity) {
+async function updateCartQuantity(cartId, quantity) {
   try {
-    const response = await apiRequest(`/cart/${productId}`, {
+    const response = await apiRequest(`/cart/${cartId}`, {
       method: 'PUT',
       body: JSON.stringify({ quantity })
     });
@@ -234,7 +243,7 @@ function renderProductCard(product) {
 
 function renderCartItem(item) {
   return `
-    <div class="cart-item" data-product-id="${item.product_id}">
+    <div class="cart-item" data-cart-id="${item.id}">
       <div class="item-image">
         <img src="${item.image_url}" alt="${item.title}">
       </div>
@@ -243,15 +252,15 @@ function renderCartItem(item) {
         <p class="item-price">$${parseFloat(item.price).toFixed(2)}</p>
       </div>
       <div class="item-quantity">
-        <button class="quantity-btn" onclick="updateQuantity(${item.product_id}, ${item.quantity - 1})">-</button>
+        <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
         <span class="quantity">${item.quantity}</span>
-        <button class="quantity-btn" onclick="updateQuantity(${item.product_id}, ${item.quantity + 1})">+</button>
+        <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
       </div>
       <div class="item-total">
         $${(parseFloat(item.price) * item.quantity).toFixed(2)}
       </div>
       <div class="item-actions">
-        <button class="btn btn-danger" onclick="removeFromCart(${item.product_id})">
+        <button class="btn btn-danger" onclick="removeFromCartItem(${item.id})">
           <i class="fas fa-trash"></i>
         </button>
       </div>
@@ -400,7 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const productData = {
         title: formData.get('title'),
         description: formData.get('description'),
-        category_id: parseInt(formData.get('category')),
+        category: formData.get('category'),
         price: parseFloat(formData.get('price')),
         image_url: formData.get('image_url')
       };
@@ -453,6 +462,16 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load cart on cart page
   if (window.location.pathname.includes('cart.html')) {
     loadCart();
+  }
+
+  // Load listings on listings page
+  if (window.location.pathname.includes('listings.html')) {
+    loadListings();
+  }
+
+  // Load dashboard data on dashboard page
+  if (window.location.pathname.includes('dashboard.html')) {
+    loadDashboard();
   }
 
   // Load featured products on index page
@@ -541,6 +560,65 @@ function updateCartSummary(cartItems) {
   if (taxEl) taxEl.textContent = `$${tax.toFixed(2)}`;
   if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
   if (checkoutBtn) checkoutBtn.disabled = false;
+}
+
+async function loadListings() {
+  const container = document.getElementById('listings-container');
+  const loading = document.getElementById('loading');
+  const noListings = document.getElementById('no-listings');
+  
+  if (loading) loading.style.display = 'block';
+  
+  try {
+    const products = await getMyProducts();
+    
+    if (loading) loading.style.display = 'none';
+    
+    if (products.length === 0) {
+      if (noListings) noListings.style.display = 'block';
+      return;
+    }
+    
+    if (container) {
+      container.innerHTML = products.map(renderProductCard).join('');
+    }
+  } catch (error) {
+    if (loading) loading.style.display = 'none';
+    showMessage('Failed to load listings', 'error');
+  }
+}
+
+async function loadDashboard() {
+  try {
+    // Load user's products
+    const products = await getMyProducts();
+    const productsCountEl = document.getElementById('products-count');
+    if (productsCountEl) {
+      productsCountEl.textContent = products.length;
+    }
+    
+    // Load user's products in the recent section
+    const userProductsEl = document.getElementById('user-products');
+    if (userProductsEl && products.length > 0) {
+      const recentProducts = products.slice(0, 6); // Show first 6 products
+      userProductsEl.innerHTML = recentProducts.map(renderProductCard).join('');
+    }
+    
+    // Load cart items count
+    const cartItems = await getCartItems();
+    const cartItemsEl = document.getElementById('cart-items');
+    if (cartItemsEl) {
+      cartItemsEl.textContent = cartItems.length;
+    }
+    
+    // Calculate total sales (simplified - would need purchase history)
+    const totalSalesEl = document.getElementById('total-sales');
+    if (totalSalesEl) {
+      totalSalesEl.textContent = '$0.00'; // Placeholder
+    }
+  } catch (error) {
+    console.error('Failed to load dashboard data:', error);
+  }
 }
 
 // Validation Functions
@@ -646,14 +724,14 @@ function showFieldSuccess(inputEl, errorEl) {
 }
 
 // Global functions for cart operations
-async function updateQuantity(productId, newQuantity) {
+async function updateQuantity(cartId, newQuantity) {
   if (newQuantity <= 0) {
-    await removeFromCart(productId);
+    await removeFromCart(cartId);
     return;
   }
   
   try {
-    await updateCartQuantity(productId, newQuantity);
+    await updateCartQuantity(cartId, newQuantity);
     loadCart();
     updateCartCount();
   } catch (error) {
@@ -661,9 +739,9 @@ async function updateQuantity(productId, newQuantity) {
   }
 }
 
-async function removeFromCart(productId) {
+async function removeFromCartItem(cartId) {
   try {
-    await removeFromCart(productId);
+    await removeFromCart(cartId);
     loadCart();
     updateCartCount();
     showMessage('Item removed from cart', 'success');

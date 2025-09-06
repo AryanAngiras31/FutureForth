@@ -31,10 +31,10 @@ def complete_purchase():
         cursor.execute("""
             INSERT INTO purchases (user_id, product_id, amount, quantity, purchase_date)
             VALUES (%s, %s, %s, %s, %s)
-        """, (user_id, product_id, amount, quantity, datetime.utcnow()))
+        """, (int(user_id), product_id, amount, quantity, datetime.utcnow()))
 
         cursor.execute("UPDATE products SET status = 'sold' WHERE id = %s", (product_id,))
-        cursor.execute("DELETE FROM cart WHERE user_id = %s AND product_id = %s", (user_id, product_id))
+        cursor.execute("DELETE FROM cart WHERE user_id = %s AND product_id = %s", (int(user_id), product_id))
 
         conn.commit()
         return jsonify(message="Purchase completed"), 201
@@ -51,6 +51,6 @@ def get_purchase_history():
         SELECT p.id, pr.title, p.amount, p.quantity, p.purchase_date FROM purchases p
         JOIN products pr ON p.product_id = pr.id
         WHERE p.user_id = %s ORDER BY p.purchase_date DESC
-    """, (user_id,))
+    """, (int(user_id),))
     purchases = cursor.fetchall()
     return jsonify([dict(purchase) for purchase in purchases]), 200
