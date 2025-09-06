@@ -1,12 +1,12 @@
-FROM python:3.13-bookworm
+FROM node:18-alpine
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY package*.json ./
+RUN npm install
 
-COPY . . 
+COPY . .
 
 EXPOSE 8080
 
-CMD ["python", "api.py"]
+CMD ["node", "index.js"]
