@@ -4,8 +4,28 @@ const API_BASE_URL = 'http://localhost:5000/api';
 // Utility Functions
 function showMessage(message, type = 'info') {
   const messageEl = document.getElementById('message');
+  const messageIcon = document.getElementById('message-icon');
+  const messageText = document.getElementById('message-text');
+  
   if (messageEl) {
-    messageEl.textContent = message;
+    // Set icon based on message type
+    if (messageIcon) {
+      if (type === 'success') {
+        messageIcon.innerHTML = '✅';
+      } else if (type === 'error') {
+        messageIcon.innerHTML = '❌';
+      } else {
+        messageIcon.innerHTML = 'ℹ️';
+      }
+    }
+    
+    // Set message text
+    if (messageText) {
+      messageText.textContent = message;
+    } else {
+      messageEl.textContent = message;
+    }
+    
     messageEl.className = `message ${type}`;
     messageEl.style.display = 'block';
     
