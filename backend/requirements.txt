@@ -1,4 +1,4 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
+flask
+flask-bcrypt
+flask-jwt-extended
 psycopg2-binary
