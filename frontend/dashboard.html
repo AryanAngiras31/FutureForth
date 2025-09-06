@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoFinds - Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <img src="logo.png" alt="EcoFinds Logo" class="logo"/>
+        <span>EcoFinds</span>
+      </div>
+      <div class="nav-menu">
+        <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        <a href="products.html" class="nav-link">Browse Products</a>
+        <a href="add-product.html" class="nav-link">Sell Product</a>
+        <a href="cart.html" class="nav-link">Cart <span id="cart-count" class="cart-badge">0</span></a>
+        <div class="nav-auth">
+          <span id="user-welcome">Welcome, User</span>
+          <button id="logout-btn" class="btn btn-outline">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="dashboard">
+    <div class="container">
+      <h1>Dashboard</h1>
+      
+      <!-- Quick Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <i class="fas fa-box"></i>
+          <h3 id="products-count">0</h3>
+          <p>Products Listed</p>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-shopping-cart"></i>
+          <h3 id="cart-items">0</h3>
+          <p>Items in Cart</p>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-dollar-sign"></i>
+          <h3 id="total-sales">$0</h3>
+          <p>Total Sales</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="actions-grid">
+          <a href="add-product.html" class="action-card">
+            <i class="fas fa-plus"></i>
+            <h3>Add Product</h3>
+            <p>List a new product for sale</p>
+          </a>
+          <a href="products.html" class="action-card">
+            <i class="fas fa-search"></i>
+            <h3>Browse Products</h3>
+            <p>Find sustainable products</p>
+          </a>
+          <a href="cart.html" class="action-card">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>View Cart</h3>
+            <p>Manage your cart items</p>
+          </a>
+        </div>
+      </div>
+
+      <!-- Recent Products -->
+      <div class="recent-section">
+        <h2>Your Products</h2>
+        <div id="user-products" class="products-grid">
+          <!-- User's products will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

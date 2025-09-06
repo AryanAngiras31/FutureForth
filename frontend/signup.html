@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoFinds - Sign Up</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="auth-container">
+    <img src="logo.png" alt="EcoFinds Logo" class="logo"/>
+    <h2>Join EcoFinds</h2>
+    <p>Create your account to start buying and selling sustainable products</p>
+
+    <form id="signupForm">
+      <div class="form-group">
+        <input type="text" id="username" placeholder="Username" required minlength="3" maxlength="50">
+        <div id="username-error" class="field-error"></div>
+      </div>
+      
+      <div class="form-group">
+        <input type="email" id="email" placeholder="Email" required>
+        <div id="email-error" class="field-error"></div>
+      </div>
+      
+      <div class="form-group">
+        <input type="password" id="password" placeholder="Password" required minlength="6">
+        <div id="password-error" class="field-error"></div>
+      </div>
+      
+      <div class="form-group">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+        <div id="confirm-password-error" class="field-error"></div>
+      </div>
+      
+      <button type="submit" class="btn btn-primary" id="signup-btn">Sign Up</button>
+    </form>
+
+    <div id="message" class="message"></div>
+
+    <p>Already have an account? 
+      <a href="login.html">Login</a>
+    </p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

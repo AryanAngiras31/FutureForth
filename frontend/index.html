@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoFinds - Sustainable Marketplace</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <img src="logo.png" alt="EcoFinds Logo" class="logo"/>
+        <span>EcoFinds</span>
+      </div>
+      <div class="nav-menu">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#products" class="nav-link">Products</a>
+        <a href="#about" class="nav-link">About</a>
+        <div class="nav-auth">
+          <a href="login.html" class="btn btn-outline">Login</a>
+          <a href="signup.html" class="btn btn-primary">Sign Up</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+      <div class="hero-content">
+        <h1>Welcome to EcoFinds</h1>
+        <p>Your sustainable marketplace for buying and selling eco-friendly products</p>
+        <div class="hero-buttons">
+          <a href="signup.html" class="btn btn-primary btn-large">Get Started</a>
+          <a href="#products" class="btn btn-outline btn-large">Browse Products</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="container">
+        <h2>Why Choose EcoFinds?</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <i class="fas fa-leaf"></i>
+            <h3>Eco-Friendly</h3>
+            <p>All products are verified for their environmental impact</p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-recycle"></i>
+            <h3>Sustainable</h3>
+            <p>Promote circular economy and reduce waste</p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-users"></i>
+            <h3>Community</h3>
+            <p>Join a community of environmentally conscious individuals</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Products Preview -->
+    <section id="products" class="products-preview">
+      <div class="container">
+        <h2>Featured Products</h2>
+        <div id="featured-products" class="products-grid">
+          <!-- Products will be loaded here -->
+        </div>
+        <div class="text-center">
+          <a href="products.html" class="btn btn-primary">View All Products</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2024 EcoFinds. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
