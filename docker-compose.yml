@@ -16,7 +16,7 @@ services:
     build: ./backend
     container_name: ecofinds_backend
     ports:
-      - 8080:8080
+      - 8000:8000
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@database:5432/ecofinds
       - FLASK_ENV=development
