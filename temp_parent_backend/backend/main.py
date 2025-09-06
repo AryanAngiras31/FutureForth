@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import Optional
 
 from . import models, crud
 from .database import SessionLocal, engine
@@ -24,8 +24,7 @@ def read_products(
     category: Optional[str] = Query(None),
     min_price: Optional[float] = Query(None),
     max_price: Optional[float] = Query(None),
-    tags: Optional[List[str]] = Query(None),
     db: Session = Depends(get_db)
 ):
-    products = crud.get_products(db, title, category, min_price, max_price, tags)
+    products = crud.get_products(db, title=title, category_name=category, min_price=min_price, max_price=max_price)
     return products
